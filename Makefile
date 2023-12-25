@@ -8,7 +8,8 @@ all: extract preprocess $(OUTPUT_PDFS)
 $(foreach d,$(DOCUMENTS), $(eval $(d): $(d)-preprocessed.txt $(d).pdf))
 
 clean:
-	rm -rf $(addsuffix -input,$(DOCUMENTS))
+	rm -rf  $(addsuffix -input,$(DOCUMENTS)) \
+		$(addsuffix .pdf.txt,$(DOCUMENTS))
 mrproper: clean
 	rm $(INPUT_PDFS)
 
@@ -35,7 +36,7 @@ $(eval $(call input-file, messer, \
 extract: $(addsuffix -input/text,$(DOCUMENTS)) $(addsuffix -input/images.stamp,$(DOCUMENTS))
 %/text: %.pdf
 	mkdir -p $$(dirname $@)
-	pdftotext $< $@
+	pdftotext $< - | fold -w 80 -s > $@
 %/images.stamp: %.pdf
 	rm -f $@
 	mkdir -p $$(dirname $@)
@@ -67,3 +68,10 @@ preprocess: $(addsuffix -preprocessed.txt,$(DOCUMENTS))
 #
 %.pdf: %.markdown %-input/image*jpg
 	pandoc -st latex -o $@ $<
+
+#
+# -------- Showing Differences Between Upstream and Downstream Version ---------
+#
+%.diff: %.pdf %-input/text
+	@pdftotext $*.pdf - | fold -w 80 -s > $*.pdf.txt
+	wdiff $*.pdf.txt $*-input/text
