@@ -66,8 +66,8 @@ preprocess: $(addsuffix -preprocessed.txt,$(DOCUMENTS))
 #
 # -------- Creating Output Files From The Manually Typeset Documents -----------
 #
-%.pdf: %.markdown %-input/image*jpg
-	pandoc -st latex -o $@ $<
+%.pdf: %.markdown %-input/images.stamp %-input/image*jpg
+	pandoc -st latex -f markdown --pdf-engine xelatex -o $@ $<
 
 #
 # -------- Showing Differences Between Upstream and Downstream Version ---------
